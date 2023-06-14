@@ -1,0 +1,11 @@
+node_modules
+artifacts
+cache
+deployments
+.env
+.env.*
+yarn.lock
+
+coverage
+gas-report.text
+coverage.json
