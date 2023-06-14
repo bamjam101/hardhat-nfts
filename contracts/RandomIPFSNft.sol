@@ -13,12 +13,12 @@ error RandomIPFSNft__TransferToOwnerFailed();
 
 contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
   /*
-    Things to do:
-    1. When minting happens, Chainlink VRF will be triggered and a random number will be provided for facilitating our RandomIPFSNft contract
-    2. Using random number we obtain random NFT out of the list - Pug, Shiba Inu, St. Bernard wher Pug is super rare, Shiba Inu is sort of rare, and lastly St. Bernard is common find.
-    3. Users have to pay to mint an NFt
-    4. and the payed amount is accumulated and retrieveable by the owner of the NFT
-    */
+  Things to do:
+  1. When minting happens, Chainlink VRF will be triggered and a random number will be provided for facilitating our RandomIPFSNft contract
+  2. Using random number we obtain random NFT out of the list - Pug, Shiba Inu, St. Bernard wher Pug is super rare, Shiba Inu is sort of rare, and lastly St. Bernard is common find.
+  3. Users have to pay to mint an NFt
+  4. and the payed amount is accumulated and retrieveable by the owner of the NFT
+  */
 
   // Type Declaration
   enum Breed {
@@ -53,8 +53,8 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint64 subscriptionId,
     bytes32 gasLane,
     uint32 callbackGasLimit,
-    string[3] memory dogTokenUris,
-    uint256 mintFee
+    uint256 mintFee,
+    string[3] memory dogTokenUris
   ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721("Random IPFS NFT", "RIN") {
     i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
     i_subscriptionId = subscriptionId;
@@ -111,6 +111,7 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     */
     // based on the enum breed is being assigned depending on the result retured by getBreedFromModdedRange
     Breed dogBreed = getBreedFromModdedRange(moddedRng);
+    s_tokenCounter += s_tokenCounter;
     // Minting of NFT
     _safeMint(nftDogOwner, newTokenId);
     _setTokenURI(
@@ -121,6 +122,9 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     emit NFTMinted(dogBreed, nftDogOwner);
   }
 
+  /**
+   * @notice withdraw function for owner to collect the accumulated amount from minting of their NFT
+   */
   function withdraw() public onlyOwner {
     uint256 amount = address(this).balance;
     (bool success, ) = payable(msg.sender).call{value: amount}("");
@@ -154,9 +158,13 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     revert RandomIPFSNft__RangeOutOfBounds();
   }
 
+  /**
+   * @notice returns an array crucial to determine the breed of the dog
+   * @dev with index the rarity of breed decreases
+   */
   function getChanceArray() public pure returns (uint256[3] memory) {
-    // 10% chance of index 0, 20% chance of index 1 and 60% chance of index 2
-    return [10, 30, MAX_CHANCE_VALUE];
+    // 10% chance of index 0, 30% chance of index 1 and 60% chance of index 2
+    return [10, 40, MAX_CHANCE_VALUE];
   }
 
   function getMintFee() public view returns (uint256) {
