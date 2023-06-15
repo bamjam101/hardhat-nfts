@@ -43,6 +43,7 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
   uint256 internal constant MAX_CHANCE_VALUE = 100;
   string[] internal s_dogTokenUris;
   uint256 private immutable i_mintFee;
+  bool private immutable i_isInitialized;
 
   // Events
   event NFTRequested(uint256 indexed requestId, address requester);
@@ -62,6 +63,7 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     i_callbackGasLimit = callbackGasLimit;
     s_dogTokenUris = dogTokenUris;
     i_mintFee = mintFee;
+    i_isInitialized = true;
   }
 
   /**
@@ -111,7 +113,7 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     */
     // based on the enum breed is being assigned depending on the result retured by getBreedFromModdedRange
     Breed dogBreed = getBreedFromModdedRange(moddedRng);
-    s_tokenCounter += s_tokenCounter;
+    s_tokenCounter = s_tokenCounter + 1;
     // Minting of NFT
     _safeMint(nftDogOwner, newTokenId);
     _setTokenURI(
@@ -177,5 +179,9 @@ contract RandomIPFSNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
 
   function getTokenCounter() public view returns (uint256) {
     return s_tokenCounter;
+  }
+
+  function getInitializationStatus() public view returns (bool) {
+    return i_isInitialized;
   }
 }

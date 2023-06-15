@@ -57,27 +57,30 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
   3. nft.storage - https://nft.storage/
   Preferred by developers to pin their data through 2 of the above ways, nft.storage won't be covered but it is more of an on chain data pinning and more robust of the all, so preferred for geniune projects.
 */
-  let tokenUris
+  let tokenUris = [
+    "ipfs://QmYg8yWzmAsyUfWfBd98v5CC2wtCYJDLenWvm9Po1PzLiQ",
+    "ipfs://QmVZ1pXmVEBEafDVYRnb8QenWKMdTbfSnDtcJ9qNZ4sBZX",
+    "ipfs://QmSv5mTF9sDRWWKKxDGwjgqCDBpXvH9qyCW4UGN3QP219D",
+  ]
   if (process.env.UPLOAD_TO_PINATA == "true") {
     tokenUris = await handleTokenUris()
   }
 
   log("------------------------------")
-  let vrfCoordinatorV2Address, subscriptionId
+  let vrfCoordinatorV2Address, subscriptionId, vrfCoordinatorV2Mock
   if (developmentChains.includes(network.name)) {
-    const vrfCoordinatorV2Mock = await ethers.getContract(
-      "VRFCoordinatorV2Mock"
-    )
+    vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock")
     vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address
     const transactionResponse = await vrfCoordinatorV2Mock.createSubscription()
     const transactionReceipt = await transactionResponse.wait(1)
     subscriptionId = transactionReceipt.events[0].args.subId
-
+    // Fund the subscription, our mock makes it so we don't actually have to worry about sending fund
     await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
   } else {
     vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
     subscriptionId = networkConfig[chainId].subscriptionId
   }
+
   const args = [
     vrfCoordinatorV2Address,
     subscriptionId,
@@ -92,6 +95,13 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     log: true,
     waitConfirmation: network.config.blockConfirmations || 1,
   })
+
+  if (developmentChains.includes(network.name)) {
+    await vrfCoordinatorV2Mock.addConsumer(
+      subscriptionId,
+      randomIPFSNft.address
+    )
+  }
 
   if (
     !developmentChains.includes(network.name) &&
