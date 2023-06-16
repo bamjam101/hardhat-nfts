@@ -113,4 +113,4 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
   log("------------------------------")
 }
-module.exports.tags = ["all", "randomipfsnft"]
+module.exports.tags = ["all", "randomipfsnft", "main"]
