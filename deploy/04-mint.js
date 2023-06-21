@@ -3,7 +3,6 @@ const { developmentChains } = require("../helper-hardhat-config")
 
 module.exports = async ({ getNamedAccounts }) => {
   const { deployer } = await getNamedAccounts()
-  const chainId = network.config.chainId
 
   // Basic NFT Minting
   const basicNft = await ethers.getContract("BasicNft", deployer)
